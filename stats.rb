@@ -1,0 +1,225 @@
+#!/usr/bin/env ruby
+require 'pp'
+require 'nokogiri'
+require 'logger'
+require 'net/http'
+require 'sinatra'
+
+presetteamname = 'example'
+presetsport = 'mbball'
+presetxmlfile = '1'
+
+set :port, '8880'
+set :bind, '0.0.0.0'
+
+scriptname = "Sports Stats XML Manipulator"
+scriptver = "1.1.0"
+
+get '/stats' do
+    sport = params[:sport]
+    sport = presetsport if sport.nil?
+
+    teamname = params[:team]
+    teamname = presetteamname if teamname.nil?
+
+    xmlfile = params[:xmlfile]
+    xmlfile = presetxmlfile if xmlfile.nil?
+
+
+    content_type 'text/xml'
+    #$logger = Logger.new(STDERR)
+    #$logger.info "Starting up..."
+
+    xmluri = '/' + teamname + '/' + sport + '/' + xmlfile + '.xml'
+    xmlget = Net::HTTP.new('sidearmstats.com').request_get(xmluri)
+
+    #$logger.debug xmlget.body
+    abort "GET FAILURE Response" unless xmlget.kind_of? Net::HTTPSuccess
+
+    originals = Array [ "osource","oversion" ]
+
+    doc = Nokogiri::XML(xmlget.body)
+
+    #original uniform[0], remapped uniform[1], player xpath[2],
+    #source[3],version[4],base[5]
+    uniupdates = Array [
+    "uni","unilu","/bbgame/team/player",
+    "source","version","/bbgame"
+    ]
+
+    uniupdates = Array [
+    "uni","unilu","/sogame/team/player",
+    "source","version","/sogame"
+    ] if sport == 'msoc' || sport == 'wsoc'
+
+    uniupdates = Array [
+    "uni","unilu","lcgame/team/player",
+    "source","version","/lcgame"
+    ] if sport == 'mlax' || sport == 'wlax'
+
+    uniupdates = Array [
+    "uni","unilu","bsgame/team/player",
+    "source","version","/bsgame"
+    ] if sport == 'baseball' || sport == 'softball'
+
+    basepath = doc.root
+    basepath.set_attribute(originals[0], basepath.attribute(uniupdates[3]))
+    basepath.set_attribute(originals[1], basepath.attribute(uniupdates[4]))
+    basepath.set_attribute(uniupdates[3], scriptname)
+    basepath.set_attribute(uniupdates[4], scriptver)
+
+    players = doc.xpath(uniupdates[2])
+
+    players.each do |player|
+    uni = player.attribute(uniupdates[0]).value
+    uni = 90 if uni == '0'
+    uni = 99 if uni == '00'
+    player.set_attribute(uniupdates[1], uni)
+    end
+
+    #[uid, xpath, stats object, stat to sort, output]
+    xpathsorts = Array[
+    ["personId","/bbgame/team[@vh='H']/player","stats","tp","tp_order"],
+    ["personId","/bbgame/team[@vh='V']/player","stats","tp","tp_order"],
+    ["personId","/bbgame/team/player","stats","tp","tp_tot_order"],
+    ["personId","/bbgame/team[@vh='H']/player","stats","pf","pf_order"],
+    ["personId","/bbgame/team[@vh='V']/player","stats","pf","pf_order"],
+    ["personId","/bbgame/team/player","stats","pf","pf_tot_order"],
+    ["personId","/bbgame/team[@vh='H']/player","stats","treb","treb_order"],
+    ["personId","/bbgame/team[@vh='V']/player","stats","treb","treb_order"],
+    ["personId","/bbgame/team/player","stats","treb","treb_tot_order"],
+    ["personId","/bbgame/team[@vh='H']/player","stats","ast","ast_order"],
+    ["personId","/bbgame/team[@vh='V']/player","stats","ast","ast_order"],
+    ["personId","/bbgame/team/player","stats","ast","ast_tot_order"],
+    ["personId","/bbgame/team[@vh='H']/player","stats","to","to_order"],
+    ["personId","/bbgame/team[@vh='V']/player","stats","to","to_order"],
+    ["personId","/bbgame/team/player","stats","to","to_tot_order"]
+    ]
+
+    xpathsorts = Array[
+    ["code","/sogame/team[@vh='H']/player","shots","g","g_order"],
+    ["code","/sogame/team[@vh='V']/player","shots","g","g_order"],
+    ["code","/sogame/team/player","shots","g","g_tot_order"],
+    ["code","/sogame/team[@vh='H']/player","shots","a","a_order"],
+    ["code","/sogame/team[@vh='V']/player","shots","a","a_order"],
+    ["code","/sogame/team/player","shots","a","a_tot_order"]
+    ] if sport == 'msoc' || sport == 'wsoc'
+
+    xpathsorts = Array[
+    ["code","/lcgame/team[@vh='H']/player","shots","g","g_order"],
+    ["code","/lcgame/team[@vh='V']/player","shots","g","g_order"],
+    ["code","/lcgame/team/player","shots","g","g_tot_order"],
+    ["code","/lcgame/team[@vh='H']/player","shots","a","a_order"],
+    ["code","/lcgame/team[@vh='V']/player","shots","a","a_order"],
+    ["code","/lcgame/team/player","shots","a","a_tot_order"],
+    ["code","/lcgame/team[@vh='H']/player","misc","gb","gb_order"],
+    ["code","/lcgame/team[@vh='V']/player","misc","gb","gb_order"],
+    ["code","/lcgame/team/player","misc","gb","gb_tot_order"]
+    ] if sport == 'mlax' || sport == 'wlax'
+
+    xpathsorts = Array[
+    ["name","/bsgame/team[@vh='H']/player","hitseason","h","s_h_order"],
+    ["name","/bsgame/team[@vh='V']/player","hitseason","h","s_h_order"],
+    ["name","/bsgame/team/player","hitseason","h","s_h_tot_order"],
+    ["name","/bsgame/team[@vh='H']/player","hitseason","r","s_r_order"],
+    ["name","/bsgame/team[@vh='V']/player","hitseason","r","s_r_order"],
+    ["name","/bsgame/team/player","hitseason","r","s_r_tot_order"],
+    ["name","/bsgame/team[@vh='H']/player","hitseason","rbi","s_rbi_order"],
+    ["name","/bsgame/team[@vh='V']/player","hitseason","rbi","s_rbi_order"],
+    ["name","/bsgame/team/player","hitseason","rbi","s_rbi_tot_order"],
+    ["name","/bsgame/team[@vh='H']/player","pchseason","so","s_so_order"],
+    ["name","/bsgame/team[@vh='V']/player","pchseason","so","s_so_order"],
+    ["name","/bsgame/team/player","pchseason","so","s_so_tot_order"],
+    ["name","/bsgame/team[@vh='H']/player","pchseason","era","s_era_order"],
+    ["name","/bsgame/team[@vh='V']/player","pchseason","era","s_era_order"],
+    ["name","/bsgame/team/player","pchseason","era","s_era_tot_order"]
+    ] if sport == 'baseball' || sport == 'softball'
+
+    xpathsums = Array[
+    ]
+
+    xpathsums = Array[
+    ["/sogame/team","linescore/lineprd","corners","corners"],
+    ["/sogame/team","linescore/lineprd","offsides","offsides"]
+    ] if sport == 'msoc' || sport == 'wsoc'
+
+    xpathcombines = Array[
+    ]
+
+    #[uid, xpath, stats object, stat1, stat2, concat with, output]
+    xpathcombines = Array[
+    ["name","/bsgame/team/player","hitting","h","ab","-","hab"]
+    ] if sport == 'baseball' || sport == 'softball'
+
+    xpathsorts.each do |xpathsort|
+    #$logger.debug xpathsort
+    players = doc.xpath(xpathsort[1])
+    players_item = {}
+
+    players.each do |player|
+        uni = player.attribute(xpathsort[0]).value
+        begin
+        item = player.xpath(xpathsort[2]).attribute(xpathsort[3]).value.to_i
+        #$logger.debug "Found player '#{uni}' with #{xpathsort[3]} value of '#{item}'"
+        players_item[uni] = item
+        rescue
+        end
+    end
+
+    sorted_players_item = players_item.sort_by {|uni, item| item }.reverse.to_h
+
+    players.each do |player|
+        uni = player.attribute(xpathsort[0]).value
+        player.set_attribute(xpathsort[4], sorted_players_item.keys.index(uni) ) unless sorted_players_item.keys.index(uni).nil?
+        #$logger.debug "Found player '#{uni}' again, and their index is currently '#{sorted_players_item.keys.index(uni)}'"
+    end
+
+    end
+
+    xpathsums.each do |xpathsum|
+        #["sogame/team","linescore/lineprd","corners","corners"]
+        sumtos = doc.xpath(xpathsum[0])
+        begin
+        sumtos.each do |sumto|
+            total = 0
+            sumfroms = sumto.xpath(xpathsum[1])
+            sumfroms.each do |sumfrom|
+            total += sumfrom.attribute(xpathsum[2]).value.to_i
+            end
+            sumto.set_attribute(xpathsum[3], total)
+        end
+        rescue
+
+        end
+    end
+
+    xpathcombines.each do |xpathcombine|
+        #[uid, xpath, stats object, stat1, stat2, concat with, output]
+        # ["name","/bsgame/team/player","hitting","h","ab","-","hab"]
+
+        combine = doc.xpath(xpathcombine[1])
+
+        combine.each do |combiner|
+            uni = combiner.attribute(xpathcombine[0]).value
+            begin
+            val1 = combiner.xpath(xpathcombine[2]).attribute(xpathcombine[3]).value.to_s
+            val2 = combiner.xpath(xpathcombine[2]).attribute(xpathcombine[4]).value.to_s
+            #$logger.debug "Found '#{uni}' with #{xpathcombine[3]} value of '#{val1}' and #{xpathcombine[4]} value of '#{val2}'"
+            combined = val1 + xpathcombine[5] + val2
+            #$logger.debug "Set: '#{xpathcombine[6]}' = '#{combined}'."
+            combiner.set_attribute(xpathcombine[6], combined)
+            rescue
+            end
+        end
+    end
+
+    #$logger.info "End..."
+
+    #doc.to_xml.to_s
+    output = doc.to_xml
+
+    #$logger.info "Wrote out"
+    #$logger.debug output
+
+    output
+end
