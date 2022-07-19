@@ -13,7 +13,8 @@ set :port, '8880'
 set :bind, '0.0.0.0'
 
 scriptname = "Sports Stats XML Manipulator"
-scriptver = "1.1.0"
+scriptver = "1.1.1"
+#1.1.1 add baseball pitcher sorting
 
 get '/stats' do
     sport = params[:sport]
@@ -137,12 +138,38 @@ get '/stats' do
 
     xpathsums = Array[
     ]
+    #[sumsto,sumsfrom,valuetosum,finalsum]
 
     xpathsums = Array[
     ["/sogame/team","linescore/lineprd","corners","corners"],
     ["/sogame/team","linescore/lineprd","offsides","offsides"]
     ] if sport == 'msoc' || sport == 'wsoc'
 
+    xpathlast = Array[
+    ]
+    #[sumsto,sumsfrom,valuetosum,finalsum]
+
+    xpathlast = Array[
+        ["/bsgame","team[@vh='H']/player/pchseason","era","hera"],
+        ["/bsgame","team[@vh='H']/player/pitching","bb","hbb"],
+        ["/bsgame","team[@vh='H']/player/pitching","so","hso"],
+        ["/bsgame","team[@vh='H']/player/pitching","pitches","hpitch"],
+        ["/bsgame","team[@vh='H']/player/pitching","ip","hip"],
+        ["/bsgame","team[@vh='H']/player/pchseason","vsleft","hvsl"],
+        ["/bsgame","team[@vh='H']/player/pchseason","vsright","hvsr"],
+        ["/bsgame","team[@vh='H']/player/pchseason","win","hwin"],
+        ["/bsgame","team[@vh='H']/player/pchseason","loss","hloss"],
+        ["/bsgame","team[@vh='V']/player/pchseason","era","vera"],
+        ["/bsgame","team[@vh='V']/player/pitching","bb","vbb"],
+        ["/bsgame","team[@vh='V']/player/pitching","so","vso"],
+        ["/bsgame","team[@vh='V']/player/pitching","pitches","vpitch"],
+        ["/bsgame","team[@vh='V']/player/pitching","ip","vip"],
+        ["/bsgame","team[@vh='V']/player/pchseason","vsleft","vvsl"],
+        ["/bsgame","team[@vh='V']/player/pchseason","vsright","vvsr"],
+        ["/bsgame","team[@vh='V']/player/pchseason","win","vwin"],
+        ["/bsgame","team[@vh='V']/player/pchseason","loss","vloss"]
+    ] if sport == 'baseball' || sport == 'softball'
+    
     xpathcombines = Array[
     ]
 
@@ -178,6 +205,7 @@ get '/stats' do
 
     xpathsums.each do |xpathsum|
         #["sogame/team","linescore/lineprd","corners","corners"]
+        #[sumsto,sumsfrom,valuetosum,finalsum]
         sumtos = doc.xpath(xpathsum[0])
         begin
         sumtos.each do |sumto|
@@ -185,6 +213,24 @@ get '/stats' do
             sumfroms = sumto.xpath(xpathsum[1])
             sumfroms.each do |sumfrom|
             total += sumfrom.attribute(xpathsum[2]).value.to_i
+            end
+            sumto.set_attribute(xpathsum[3], total)
+        end
+        rescue
+
+        end
+    end
+
+    xpathlast.each do |xpathsum|
+        #["sogame/team","linescore/lineprd","corners","corners"]
+        #[sumsto,sumsfrom,valuetosum,finalsum]
+        sumtos = doc.xpath(xpathsum[0])
+        begin
+        sumtos.each do |sumto|
+            total = 0
+            sumfroms = sumto.xpath(xpathsum[1])
+            sumfroms.each do |sumfrom|
+            total = sumfrom.attribute(xpathsum[2]).value
             end
             sumto.set_attribute(xpathsum[3], total)
         end
