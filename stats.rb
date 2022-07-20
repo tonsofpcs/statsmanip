@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 require 'pp'
 require 'nokogiri'
-require 'logger'
+# require 'logger'
 require 'net/http'
 require 'sinatra'
 
@@ -13,9 +13,10 @@ set :port, '8880'
 set :bind, '0.0.0.0'
 
 scriptname = "Sports Stats XML Manipulator"
-scriptver = "1.1.2"
+scriptver = "1.1.3"
 #1.1.1 add baseball pitcher sorting
 #1.1.2 make baseball pitcher selection by pitcher/appear
+#1.1.3 add line sums and division
 
 get '/stats' do
     sport = params[:sport]
@@ -29,8 +30,8 @@ get '/stats' do
 
 
     content_type 'text/xml'
-    #$logger = Logger.new(STDERR)
-    #$logger.info "Starting up..."
+    # $logger = Logger.new(STDERR)
+    # $logger.info "Starting up..."
 
     xmluri = '/' + teamname + '/' + sport + '/' + xmlfile + '.xml'
     xmlget = Net::HTTP.new('sidearmstats.com').request_get(xmluri)
@@ -81,60 +82,60 @@ get '/stats' do
 
     #[uid, xpath, stats object, stat to sort, output]
     xpathsorts = Array[
-    ["personId","/bbgame/team[@vh='H']/player","stats","tp","tp_order"],
-    ["personId","/bbgame/team[@vh='V']/player","stats","tp","tp_order"],
-    ["personId","/bbgame/team/player","stats","tp","tp_tot_order"],
-    ["personId","/bbgame/team[@vh='H']/player","stats","pf","pf_order"],
-    ["personId","/bbgame/team[@vh='V']/player","stats","pf","pf_order"],
-    ["personId","/bbgame/team/player","stats","pf","pf_tot_order"],
-    ["personId","/bbgame/team[@vh='H']/player","stats","treb","treb_order"],
-    ["personId","/bbgame/team[@vh='V']/player","stats","treb","treb_order"],
-    ["personId","/bbgame/team/player","stats","treb","treb_tot_order"],
-    ["personId","/bbgame/team[@vh='H']/player","stats","ast","ast_order"],
-    ["personId","/bbgame/team[@vh='V']/player","stats","ast","ast_order"],
-    ["personId","/bbgame/team/player","stats","ast","ast_tot_order"],
-    ["personId","/bbgame/team[@vh='H']/player","stats","to","to_order"],
-    ["personId","/bbgame/team[@vh='V']/player","stats","to","to_order"],
-    ["personId","/bbgame/team/player","stats","to","to_tot_order"]
+        ["personId","/bbgame/team[@vh='H']/player","stats","tp","tp_order"],
+        ["personId","/bbgame/team[@vh='V']/player","stats","tp","tp_order"],
+        ["personId","/bbgame/team/player","stats","tp","tp_tot_order"],
+        ["personId","/bbgame/team[@vh='H']/player","stats","pf","pf_order"],
+        ["personId","/bbgame/team[@vh='V']/player","stats","pf","pf_order"],
+        ["personId","/bbgame/team/player","stats","pf","pf_tot_order"],
+        ["personId","/bbgame/team[@vh='H']/player","stats","treb","treb_order"],
+        ["personId","/bbgame/team[@vh='V']/player","stats","treb","treb_order"],
+        ["personId","/bbgame/team/player","stats","treb","treb_tot_order"],
+        ["personId","/bbgame/team[@vh='H']/player","stats","ast","ast_order"],
+        ["personId","/bbgame/team[@vh='V']/player","stats","ast","ast_order"],
+        ["personId","/bbgame/team/player","stats","ast","ast_tot_order"],
+        ["personId","/bbgame/team[@vh='H']/player","stats","to","to_order"],
+        ["personId","/bbgame/team[@vh='V']/player","stats","to","to_order"],
+        ["personId","/bbgame/team/player","stats","to","to_tot_order"]
     ]
 
     xpathsorts = Array[
-    ["code","/sogame/team[@vh='H']/player","shots","g","g_order"],
-    ["code","/sogame/team[@vh='V']/player","shots","g","g_order"],
-    ["code","/sogame/team/player","shots","g","g_tot_order"],
-    ["code","/sogame/team[@vh='H']/player","shots","a","a_order"],
-    ["code","/sogame/team[@vh='V']/player","shots","a","a_order"],
-    ["code","/sogame/team/player","shots","a","a_tot_order"]
+        ["code","/sogame/team[@vh='H']/player","shots","g","g_order"],
+        ["code","/sogame/team[@vh='V']/player","shots","g","g_order"],
+        ["code","/sogame/team/player","shots","g","g_tot_order"],
+        ["code","/sogame/team[@vh='H']/player","shots","a","a_order"],
+        ["code","/sogame/team[@vh='V']/player","shots","a","a_order"],
+        ["code","/sogame/team/player","shots","a","a_tot_order"]
     ] if sport == 'msoc' || sport == 'wsoc'
 
     xpathsorts = Array[
-    ["code","/lcgame/team[@vh='H']/player","shots","g","g_order"],
-    ["code","/lcgame/team[@vh='V']/player","shots","g","g_order"],
-    ["code","/lcgame/team/player","shots","g","g_tot_order"],
-    ["code","/lcgame/team[@vh='H']/player","shots","a","a_order"],
-    ["code","/lcgame/team[@vh='V']/player","shots","a","a_order"],
-    ["code","/lcgame/team/player","shots","a","a_tot_order"],
-    ["code","/lcgame/team[@vh='H']/player","misc","gb","gb_order"],
-    ["code","/lcgame/team[@vh='V']/player","misc","gb","gb_order"],
-    ["code","/lcgame/team/player","misc","gb","gb_tot_order"]
+        ["code","/lcgame/team[@vh='H']/player","shots","g","g_order"],
+        ["code","/lcgame/team[@vh='V']/player","shots","g","g_order"],
+        ["code","/lcgame/team/player","shots","g","g_tot_order"],
+        ["code","/lcgame/team[@vh='H']/player","shots","a","a_order"],
+        ["code","/lcgame/team[@vh='V']/player","shots","a","a_order"],
+        ["code","/lcgame/team/player","shots","a","a_tot_order"],
+        ["code","/lcgame/team[@vh='H']/player","misc","gb","gb_order"],
+        ["code","/lcgame/team[@vh='V']/player","misc","gb","gb_order"],
+        ["code","/lcgame/team/player","misc","gb","gb_tot_order"]
     ] if sport == 'mlax' || sport == 'wlax'
 
     xpathsorts = Array[
-    ["name","/bsgame/team[@vh='H']/player","hitseason","h","s_h_order"],
-    ["name","/bsgame/team[@vh='V']/player","hitseason","h","s_h_order"],
-    ["name","/bsgame/team/player","hitseason","h","s_h_tot_order"],
-    ["name","/bsgame/team[@vh='H']/player","hitseason","r","s_r_order"],
-    ["name","/bsgame/team[@vh='V']/player","hitseason","r","s_r_order"],
-    ["name","/bsgame/team/player","hitseason","r","s_r_tot_order"],
-    ["name","/bsgame/team[@vh='H']/player","hitseason","rbi","s_rbi_order"],
-    ["name","/bsgame/team[@vh='V']/player","hitseason","rbi","s_rbi_order"],
-    ["name","/bsgame/team/player","hitseason","rbi","s_rbi_tot_order"],
-    ["name","/bsgame/team[@vh='H']/player","pchseason","so","s_so_order"],
-    ["name","/bsgame/team[@vh='V']/player","pchseason","so","s_so_order"],
-    ["name","/bsgame/team/player","pchseason","so","s_so_tot_order"],
-    ["name","/bsgame/team[@vh='H']/player","pchseason","era","s_era_order"],
-    ["name","/bsgame/team[@vh='V']/player","pchseason","era","s_era_order"],
-    ["name","/bsgame/team/player","pchseason","era","s_era_tot_order"]
+        ["name","/bsgame/team[@vh='H']/player","hitseason","h","s_h_order"],
+        ["name","/bsgame/team[@vh='V']/player","hitseason","h","s_h_order"],
+        ["name","/bsgame/team/player","hitseason","h","s_h_tot_order"],
+        ["name","/bsgame/team[@vh='H']/player","hitseason","r","s_r_order"],
+        ["name","/bsgame/team[@vh='V']/player","hitseason","r","s_r_order"],
+        ["name","/bsgame/team/player","hitseason","r","s_r_tot_order"],
+        ["name","/bsgame/team[@vh='H']/player","hitseason","rbi","s_rbi_order"],
+        ["name","/bsgame/team[@vh='V']/player","hitseason","rbi","s_rbi_order"],
+        ["name","/bsgame/team/player","hitseason","rbi","s_rbi_tot_order"],
+        ["name","/bsgame/team[@vh='H']/player","pchseason","so","s_so_order"],
+        ["name","/bsgame/team[@vh='V']/player","pchseason","so","s_so_order"],
+        ["name","/bsgame/team/player","pchseason","so","s_so_tot_order"],
+        ["name","/bsgame/team[@vh='H']/player","pchseason","era","s_era_order"],
+        ["name","/bsgame/team[@vh='V']/player","pchseason","era","s_era_order"],
+        ["name","/bsgame/team/player","pchseason","era","s_era_tot_order"]
     ] if sport == 'baseball' || sport == 'softball'
 
     xpathsums = Array[
@@ -142,9 +143,18 @@ get '/stats' do
     #[sumsto,sumsfrom,valuetosum,finalsum]
 
     xpathsums = Array[
-    ["/sogame/team","linescore/lineprd","corners","corners"],
-    ["/sogame/team","linescore/lineprd","offsides","offsides"]
+        ["/sogame/team","linescore/lineprd","corners","corners"],
+        ["/sogame/team","linescore/lineprd","offsides","offsides"]
     ] if sport == 'msoc' || sport == 'wsoc'
+
+    xpathlinesums = Array[
+    ]
+
+    xpathlinesums = Array[
+        ["/bsgame/team/player/hitseason",["h","bb","hbp"],"obp_numerator"],
+        ["/bsgame/team/player/pchseason",["h","bb","hbp"],"whip_numerator"]
+    ] if sport == 'baseball' || sport == 'softball'
+    #[sumsat,[valuestosum],finalsum]
 
     xpathfinds = Array[
     ]
@@ -185,8 +195,17 @@ get '/stats' do
 
     #[uid, xpath, stats object, stat1, stat2, concat with, output]
     xpathcombines = Array[
-    ["name","/bsgame/team/player","hitting","h","ab","-","hab"]
+        ["name","/bsgame/team/player","hitting","h","ab","-","hab"]
     ] if sport == 'baseball' || sport == 'softball'
+
+    xpathdivides = Array[
+    ]
+
+    xpathdivides = Array[
+        ["/bsgame/team/player/hitseason","obp_numerator","ab","obp"],
+        ["/bsgame/team/player/pchseason","whip_numerator","ip","whip"]
+    ] if sport == 'baseball' || sport == 'softball'
+    #[sumsat,numerator,denominator,output]
 
     xpathsorts.each do |xpathsort|
     #$logger.debug xpathsort
@@ -222,13 +241,55 @@ get '/stats' do
             total = 0
             sumfroms = sumto.xpath(xpathsum[1])
             sumfroms.each do |sumfrom|
-            total += sumfrom.attribute(xpathsum[2]).value.to_i
+                total += sumfrom.attribute(xpathsum[2]).value.to_i
             end
             sumto.set_attribute(xpathsum[3], total)
         end
         rescue
 
         end
+    end
+
+    xpathlinesums.each do |xpathsum|
+        #["/bsgame/team/player/hitseason",["h","bb","hbp"],"obp_numerator"]
+        #[sumsat,[valuestosum],finalsum]
+        sumats = doc.xpath(xpathsum[0])
+        begin
+            sumats.each do |sumat|
+                    total = 0
+                    xpathsum[1].each do |sumitem|
+                        begin
+                            total += sumat.attribute(sumitem).value.to_i
+                        rescue
+                        end
+                    end
+                    sumat.set_attribute(xpathsum[2], total)
+            end
+        rescue
+
+        end
+    end
+
+    xpathdivides.each do |xpathdivide|
+        # ["/bsgame/team/player/hitseason","obp_numerator","ab","obp"],
+        #[sumsat,numerator,denominator,output]
+        sumats = doc.xpath(xpathdivide[0])
+        # begin
+            sumats.each do |sumat|
+                    numerator = sumat.attribute(xpathdivide[1]).value.to_i
+                    # $logger.debug sumat
+                    # $logger.debug "Found '#{xpathdivide[1]}' value of '#{numerator}'"
+                    begin
+                        denominator = sumat.attribute(xpathdivide[2]).value.to_f
+                    rescue
+                        denominator = 1
+                    end
+                    total = numerator / denominator
+                    sumat.set_attribute(xpathdivide[3], total.round(3))
+            end
+        # rescue
+
+        # end
     end
 
     xpathlast.each do |xpathsum|
