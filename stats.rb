@@ -13,8 +13,9 @@ set :port, '8880'
 set :bind, '0.0.0.0'
 
 scriptname = "Sports Stats XML Manipulator"
-scriptver = "1.1.1"
+scriptver = "1.1.2"
 #1.1.1 add baseball pitcher sorting
+#1.1.2 make baseball pitcher selection by pitcher/appear
 
 get '/stats' do
     sport = params[:sport]
@@ -145,30 +146,39 @@ get '/stats' do
     ["/sogame/team","linescore/lineprd","offsides","offsides"]
     ] if sport == 'msoc' || sport == 'wsoc'
 
+    xpathfinds = Array[
+    ]
+    #searchroot, searchxpath, value, output (output relative to root)
+
+    xpathfinds = Array[
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]","name","hpitcher"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]","uni","hpitchuni"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","era","hera"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","vsleft","hvsl"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","vsright","hvsr"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","win","hwin"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","loss","hloss"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","bb","hbb"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","so","hso"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","pitches","hpitches"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","ip","hip"],
+
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]","name","vpitcher"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]","uni","vpitchuni"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","era","vera"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","vsleft","vvsl"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","vsright","vvsr"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","win","vwin"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","loss","vloss"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","bb","vbb"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","so","vso"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","pitches","vpitches"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","ip","vip"]
+    ] if sport == 'baseball' || sport == 'softball'
+
     xpathlast = Array[
     ]
     #[sumsto,sumsfrom,valuetosum,finalsum]
-
-    xpathlast = Array[
-        ["/bsgame","team[@vh='H']/player/pchseason","era","hera"],
-        ["/bsgame","team[@vh='H']/player/pitching","bb","hbb"],
-        ["/bsgame","team[@vh='H']/player/pitching","so","hso"],
-        ["/bsgame","team[@vh='H']/player/pitching","pitches","hpitch"],
-        ["/bsgame","team[@vh='H']/player/pitching","ip","hip"],
-        ["/bsgame","team[@vh='H']/player/pchseason","vsleft","hvsl"],
-        ["/bsgame","team[@vh='H']/player/pchseason","vsright","hvsr"],
-        ["/bsgame","team[@vh='H']/player/pchseason","win","hwin"],
-        ["/bsgame","team[@vh='H']/player/pchseason","loss","hloss"],
-        ["/bsgame","team[@vh='V']/player/pchseason","era","vera"],
-        ["/bsgame","team[@vh='V']/player/pitching","bb","vbb"],
-        ["/bsgame","team[@vh='V']/player/pitching","so","vso"],
-        ["/bsgame","team[@vh='V']/player/pitching","pitches","vpitch"],
-        ["/bsgame","team[@vh='V']/player/pitching","ip","vip"],
-        ["/bsgame","team[@vh='V']/player/pchseason","vsleft","vvsl"],
-        ["/bsgame","team[@vh='V']/player/pchseason","vsright","vvsr"],
-        ["/bsgame","team[@vh='V']/player/pchseason","win","vwin"],
-        ["/bsgame","team[@vh='V']/player/pchseason","loss","vloss"]
-    ] if sport == 'baseball' || sport == 'softball'
     
     xpathcombines = Array[
     ]
@@ -236,6 +246,18 @@ get '/stats' do
         end
         rescue
 
+        end
+    end
+
+    xpathfinds.each do |xpathfind|
+        finddoc = doc.xpath(xpathfind[0])
+
+        finddoc.each do |findit|
+          begin
+            findout = findit.xpath(xpathfind[1]).attribute(xpathfind[2]).value
+            findit.set_attribute(xpathfind[3], findout)
+          rescue
+          end
         end
     end
 
