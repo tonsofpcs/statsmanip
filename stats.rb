@@ -151,6 +151,7 @@ get '/stats' do
     ]
 
     xpathlinesums = Array[
+        ["/bsgame/team/player/hitseason",["ab","bb","hbp"],"pa"],
         ["/bsgame/team/player/hitseason",["h","bb","hbp"],"obp_numerator"],
         ["/bsgame/team/player/pchseason",["h","bb","hbp"],"whip_numerator"]
     ] if sport == 'baseball' || sport == 'softball'
@@ -202,7 +203,7 @@ get '/stats' do
     ]
 
     xpathdivides = Array[
-        ["/bsgame/team/player/hitseason","obp_numerator","ab","obp"],
+        ["/bsgame/team/player/hitseason","obp_numerator","pa","obp"],
         ["/bsgame/team/player/pchseason","whip_numerator","ip","whip"]
     ] if sport == 'baseball' || sport == 'softball'
     #[sumsat,numerator,denominator,output]
