@@ -13,10 +13,11 @@ set :port, '8880'
 set :bind, '0.0.0.0'
 
 scriptname = "Sports Stats XML Manipulator"
-scriptver = "1.1.3"
+scriptver = "1.1.4"
 #1.1.1 add baseball pitcher sorting
 #1.1.2 make baseball pitcher selection by pitcher/appear
 #1.1.3 add line sums and division
+#1.1.4 add basketball team stats fgraw, fg3raw, ftraw concatenations
 
 get '/stats' do
     sport = params[:sport]
@@ -192,6 +193,9 @@ get '/stats' do
     #[sumsto,sumsfrom,valuetosum,finalsum]
     
     xpathcombines = Array[
+        ["id","/bbgame/team","totals/stats","fgm","fga","-","fgraw"],
+        ["id","/bbgame/team","totals/stats","fgm3","fga3","-","fg3raw"],
+        ["id","/bbgame/team","totals/stats","ftm","fta","-","ftraw"]
     ]
 
     #[uid, xpath, stats object, stat1, stat2, concat with, output]
