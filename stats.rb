@@ -18,6 +18,7 @@ scriptver = "1.1.4"
 #1.1.2 make baseball pitcher selection by pitcher/appear
 #1.1.3 add line sums and division
 #1.1.4 add basketball team stats fgraw, fg3raw, ftraw concatenations
+#1.1.5 add baseball pitcher in-game hits, earned runs
 
 get '/stats' do
     sport = params[:sport]
@@ -174,7 +175,9 @@ get '/stats' do
         ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","so","hso"],
         ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","pitches","hpitches"],
         ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","ip","hip"],
-
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","h","hh"],
+        ["/bsgame","team[@vh='H']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","er","her"],
+        
         ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]","name","vpitcher"],
         ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]","uni","vpitchuni"],
         ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pchseason","era","vera"],
@@ -185,7 +188,9 @@ get '/stats' do
         ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","bb","vbb"],
         ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","so","vso"],
         ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","pitches","vpitches"],
-        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","ip","vip"]
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","ip","vip"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","h","vh"],
+        ["/bsgame","team[@vh='V']/player[not(preceding-sibling::player/pitching/@appear > pitching/@appear) and not(following-sibling::player/pitching/@appear > pitching/@appear) and (pitching/@appear > 0)]/pitching","er","ver"]
     ] if sport == 'baseball' || sport == 'softball'
 
     xpathlast = Array[
