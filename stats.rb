@@ -13,12 +13,13 @@ set :port, '8880'
 set :bind, '0.0.0.0'
 
 scriptname = "Sports Stats XML Manipulator"
-scriptver = "1.1.5"
+scriptver = "1.1.6"
 #1.1.1 add baseball pitcher sorting
 #1.1.2 make baseball pitcher selection by pitcher/appear
 #1.1.3 add line sums and division
 #1.1.4 add basketball team stats fgraw, fg3raw, ftraw concatenations
 #1.1.5 add baseball pitcher in-game hits, earned runs
+#1.1.6 add xpathsort player catch for invalid unique id, adds random id between 10000 and 99999
 
 get '/stats' do
     sport = params[:sport]
