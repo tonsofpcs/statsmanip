@@ -223,7 +223,13 @@ get '/stats' do
     players_item = {}
 
     players.each do |player|
-        uni = player.attribute(xpathsort[0]).value
+        begin
+          uni = player.attribute(xpathsort[0]).value
+        rescue
+          newindex = rand(89999)+10000
+          player.set_attribute(xpathsort[0], newindex)
+          uni = player.attribute(xpathsort[0]).value
+        end
         begin
         item = player.xpath(xpathsort[2]).attribute(xpathsort[3]).value.to_i
         #$logger.debug "Found player '#{uni}' with #{xpathsort[3]} value of '#{item}'"
