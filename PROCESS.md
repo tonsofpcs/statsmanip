@@ -44,7 +44,7 @@
   * ``g_tot_order`` based on ``g`` (goals)
   * ``a_tot_order`` based on ``a`` (assists)
   * ``gb_tot_order`` based on ``gb`` (ground balls)
-* Each team (``/sogame/team``) has added the following summed values:
+* Each team (``/lcgame/team``) has added the following summed values:
   * ``facetot`` (sum of ``facewon`` and ``facelost``)
 * Each team (``/lcgame/team``) has added the following 'combined' values:
   * ``facewinratio`` is a combination of ``facewon/facetot`` from ``totals/misc``
