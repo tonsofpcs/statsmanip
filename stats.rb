@@ -20,7 +20,7 @@ scriptver = "1.1.7"
 #1.1.4 add basketball team stats fgraw, fg3raw, ftraw concatenations
 #1.1.5 add baseball pitcher in-game hits, earned runs
 #1.1.6 add xpathsort player catch for invalid unique id, adds random id between 10000 and 99999
-#1.1.7 add lacrosse faceoff and powerplay ratios
+#1.1.7a add lacrosse faceoff and powerplay ratios
 
 get '/stats' do
     sport = params[:sport]
@@ -161,7 +161,7 @@ get '/stats' do
     ] if sport == 'baseball' || sport == 'softball'
 
     xpathlinesums = Array[
-        ["/lcgame/team/totals/misc",["facewon","faceloss"],"facetot"]  # faceoff total # = faceoff wins + faceoff losses
+        ["/lcgame/team/totals/misc",["facewon","facelost"],"facetot"]  # faceoff total # = faceoff wins + faceoff losses
     ] if sport == 'mlax' || sport == 'wlax'
     #[sumsat,[valuestosum],finalsum]
 
@@ -215,8 +215,8 @@ get '/stats' do
     ] if sport == 'baseball' || sport == 'softball'
 
     xpathcombines = Array[
-        ["id","/lcgame/team/totals","misc","facewon","facetot","/","facewinratio"],  #faceoff wins / total # of faceoffs
-        ["id","/lcgame/team/totals","powerplay","ppg","ppopp","-","ppratio"]  #powerplay goals - powerplay opportunities
+        ["id","/lcgame/team","totals/misc","facewon","facetot","/","facewinratio"],  #faceoff wins / total # of faceoffs
+        ["id","/lcgame/team","totals/powerplay","ppg","ppopp","-","ppratio"]  #powerplay goals - powerplay opportunities
     ] if sport == 'mlax' || sport == 'wlax'
 
     xpathdivides = Array[
