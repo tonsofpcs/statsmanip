@@ -21,3 +21,32 @@
   * ``fgraw`` is a combination of ``fgm-fga`` from ``totals/stats``
   * ``fg3raw`` is ``fgm3-fga3`` from ``totals/stats``
   * ``ftraw`` is ``ftm-fta`` from ``totals/stats``
+
+## Soccer ('msoc' or 'wsoc')
+* Player data processing is based on ``code``.  Duplicates will cause problems.  
+* Each player (``/sogame/team/player``) has the following sorting orders added, based on their order in the team (highest to lowest, 0-indexed): 
+  * ``g_order`` based on ``g`` (goals)
+  * ``a_order`` based on ``a`` (assists)
+* Additionally, each player has the following sorting orders added based on their order amongst all players:
+  * ``g_tot_order`` based on ``g`` (goals)
+  * ``a_tot_order`` based on ``a`` (assists)
+* Each team (``/sogame/team``) has added the following summed linescore values (across periods):
+  * ``corners`` (sum of each ``linescore/lineprd.corners``)
+  * ``offsides`` (sum of each ``linescore/lineprd.offsides``)
+
+## Lacrossse ('mlax' or 'wlax')
+* Player data processing is based on ``code``, team data is based on ``id``.  Duplicates will cause problems.  
+* Each player (``/lcgame/team/player``) has the following sorting orders added, based on their order in the team (highest to lowest, 0-indexed): 
+  * ``g_order`` based on ``g`` (goals)
+  * ``a_order`` based on ``a`` (assists)
+  * ``gb_order`` based on ``gb`` (ground balls)
+* Additionally, each player has the following sorting orders added based on their order amongst all players:
+  * ``g_tot_order`` based on ``g`` (goals)
+  * ``a_tot_order`` based on ``a`` (assists)
+  * ``gb_tot_order`` based on ``gb`` (ground balls)
+* Each team (``/sogame/team``) has added the following summed values:
+  * ``facetot`` (sum of ``facewon`` and ``facelost``)
+* Each team (``/lcgame/team``) has added the following 'combined' values:
+  * ``facewinratio`` is a combination of ``facewon/facetot`` from ``totals/misc``
+  * ``ppratio`` is a combination of ``ppg-ppopp`` from ``totals/powerplay``
+
