@@ -50,3 +50,40 @@
   * ``facewinratio`` is a combination of ``facewon/facetot`` from ``totals/misc``
   * ``ppratio`` is a combination of ``ppg-ppopp`` from ``totals/powerplay``
 
+## Baseball and Softball ('baseball' or 'softball')
+* Player data processing is based on ``name``, team data is based on ``name``.  Duplicates will cause problems.  
+* Each player (``/bsgame/team/player``) has the following sorting orders added, based on their order in the team (highest to lowest, 0-indexed): 
+  * ``s_h_order`` based on ``hitseason.h`` (season hits)
+  * ``s_r_order`` based on ``hitseason.r`` (season runs)
+  * ``s_rbi_order`` based on ``hitseason.rbi`` (season RBI)
+  * ``s_so_order`` based on ``pchseason.so`` (season strikeouts)
+  * ``s_era_order`` based on ``pchseason.rbi`` (season ERA)
+* Additionally, each player has the following sorting orders added based on their order amongst all players:
+  * ``s_h_tot_order`` based on ``hitseason.h`` (season hits)
+  * ``s_r_tot_order`` based on ``hitseason.r`` (season runs)
+  * ``s_rbi_tot_order`` based on ``hitseason.rbi`` (season RBI)
+  * ``s_so_tot_order`` based on ``pchseason.so`` (season strikeouts)
+  * ``s_era_tot_order`` based on ``pchseason.rbi`` (season ERA)
+* Each player has added the following summed values:
+  * ``pa`` (sum of ``ab``, ``bb``, and ``hbp`` in ``hitseason``)
+  * ``obp_numerator`` (sum of ``h``, ``bb``, and ``hbp`` in ``hitseason``)
+  * ``whip_numerator`` (sum of ``h``, ``bb``, and ``hbp`` in ``pchseason``)
+* Each player has added the following calculated values:
+  * ``obp`` in ``hitseason`` is ``obp_numerator`` divided by ``pa``
+  * ``whip`` in ``pchseason`` is ``whip_numerator`` divided by ``ip``
+* The root (``/bsgame``) has the following data added for the current pitchers (initial ``h`` is for home, replace with ``v`` for visitor):
+  * ``hpitcher`` from ``name``
+  * ``hpitceruni`` from ``uni``
+  * ``hera`` from ``pchseason/era``
+  * ``hvsl`` from ``pchseason/vsleft``
+  * ``hvsr`` from ``pchseason/vsright``
+  * ``hwin`` from ``pchseason/winn``
+  * ``hloss`` from ``pchseason/loss``
+  * ``hbb`` from ``pitching/bb``
+  * ``hso`` from ``pitching/so``
+  * ``hpitches`` from ``pitching/pitches``
+  * ``hip`` from ``pitching/ip``
+  * ``hh`` from ``pitching/h``
+  * ``her`` from ``pitching/er``
+* Each team (``/bsgame/team``) has added the following 'combined' values:
+  * ``hab`` is a combination of ``h-ab`` from ``hitting``
