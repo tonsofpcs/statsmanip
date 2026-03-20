@@ -13,7 +13,7 @@ set :port, '8880'
 set :bind, '0.0.0.0'
 
 scriptname = "Sports Stats XML Manipulator"
-scriptver = "1.1.7"
+scriptver = "1.1.8"
 #1.1.1 add baseball pitcher sorting
 #1.1.2 make baseball pitcher selection by pitcher/appear
 #1.1.3 add line sums and division
@@ -21,6 +21,7 @@ scriptver = "1.1.7"
 #1.1.5 add baseball pitcher in-game hits, earned runs
 #1.1.6 add xpathsort player catch for invalid unique id, adds random id between 10000 and 99999
 #1.1.7a add lacrosse faceoff and powerplay ratios
+#1.1.8 add lacrosse dc totals and ratios, shots/goals ratios, faceoff dc and shots-goals division
 
 get '/stats' do
     sport = params[:sport]
@@ -151,6 +152,12 @@ get '/stats' do
         ["/sogame/team","linescore/lineprd","offsides","offsides"]
     ] if sport == 'msoc' || sport == 'wsoc'
 
+    xpathsums = Array[
+        ["/lcgame","team/totals/misc","dc","dctot"],  # dc total sum of team dc
+        ["/lcgame","team[@vh='V']/totals/misc","dc","vdc"],  # visitor dc needs to be in same base in order to combine
+        ["/lcgame","team[@vh='H']/totals/misc","dc","hdc"]  # home dc needs to be in same base in order to combine
+    ] if sport == 'mlax' || sport == 'wlax'
+
     xpathlinesums = Array[
     ]
 
@@ -216,7 +223,10 @@ get '/stats' do
 
     xpathcombines = Array[
         ["id","/lcgame/team","totals/misc","facewon","facetot","/","facewinratio"],  #faceoff wins / total # of faceoffs
-        ["id","/lcgame/team","totals/powerplay","ppg","ppopp","-","ppratio"]  #powerplay goals - powerplay opportunities
+        ["id","/lcgame/team","totals/shots","g","sh","-","shotsratio"],  #goals - shots
+        ["id","/lcgame/team","totals/powerplay","ppg","ppopp","-","ppratio"],  #powerplay goals - powerplay opportunities
+        ["version","/lcgame",".","vdc","dctot","/","vdcratio"],  #visitor dc / dc total
+        ["version","/lcgame",".","hdc","dctot","/","hdcratio"]   #home dc / dc total
     ] if sport == 'mlax' || sport == 'wlax'
 
     xpathdivides = Array[
@@ -226,6 +236,12 @@ get '/stats' do
         ["/bsgame/team/player/hitseason","obp_numerator","pa","obp"],
         ["/bsgame/team/player/pchseason","whip_numerator","ip","whip"]
     ] if sport == 'baseball' || sport == 'softball'
+    #[sumsat,numerator,denominator,output]
+
+    xpathdivides = Array[
+        ["/lcgame/team/totals/misc","facewon","facetot","facewinpct"],  #faceoff wins / total # of faceoffs
+        ["/lcgame/team/totals/shots","g","sh","shotspct"]  #goals / shots
+    ] if sport == 'mlax' || sport == 'wlax'
     #[sumsat,numerator,denominator,output]
 
     xpathsorts.each do |xpathsort|
