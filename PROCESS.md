@@ -1,4 +1,4 @@
-# Stats.rb Version 1.1.7a Processing:
+# Stats.rb Version 1.1.8 Processing:
 
 ## All sports
 * Each player has a value ``unilu`` added where ``unilu`` is ``uni`` except for if ``uni`` is 0 or 00, ``unilu`` becomes 90 or 99, respectively.
@@ -36,6 +36,10 @@
 
 ## Lacrossse ('mlax' or 'wlax')
 * Player data processing is based on ``code``, team data is based on ``id``.  Duplicates will cause problems.  
+* The root (``/lcgame``) has added the following values added:
+  * ``dctot`` (sum of each ``team/totals/misc.dc``) (total draw controls)
+  * ``vdc`` (Visitor draw controls, taken directly from ``/lcgame/team[@vh='V']/totals/misc/dc``)
+  * ``hdc`` (Home draw controls, taken directly from ``/lcgame/team[@vh='H']/totals/misc/dc``)
 * Each player (``/lcgame/team/player``) has the following sorting orders added, based on their order in the team (highest to lowest, 0-indexed): 
   * ``g_order`` based on ``g`` (goals)
   * ``a_order`` based on ``a`` (assists)
@@ -48,7 +52,14 @@
   * ``facetot`` (sum of ``facewon`` and ``facelost``)
 * Each team (``/lcgame/team``) has added the following 'combined' values:
   * ``facewinratio`` is a combination of ``facewon/facetot`` from ``totals/misc``
+  * ``shotsratio`` is a combination of ``g-sh`` from ``totals/shots``
   * ``ppratio`` is a combination of ``ppg-ppopp`` from ``totals/powerplay``
+* The root (``/lcgame``) has added the following combined values:
+  * ``vdcratio`` is a combination of ``vdc/dctot``
+  * ``hdcratio`` is a combination of ``hdc/dctot``
+* Each team has added the following calculated values:
+  * ``facewinpct`` in ``totals/misc`` is ``facewon`` divided by ``facetot``
+  * ``shotspct`` in ``totals/shots`` is ``g`` divided by ``sh``
 
 ## Baseball and Softball ('baseball' or 'softball')
 * Player data processing is based on ``name``, team data is based on ``name``.  Duplicates will cause problems.  
